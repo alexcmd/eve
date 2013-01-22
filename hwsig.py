@@ -1,3 +1,6 @@
+#Credits to ferox2552@gmail.com
+#Login manually after injecting and decompile the rcode using uncompyle2
+
 import marshal
 import macho
 import sys
