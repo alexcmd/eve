@@ -1,0 +1,47 @@
+#Embedded file name: c:/depot/games/branches/release/EVE-TRANQUILITY/eve/client/script/environment/spaceObject/station.py
+import spaceObject
+import sys
+import pos
+SHIELD_EFFECT = 'effects.ModifyShieldResonance'
+ARMOR_EFFECT = 'effects.StructureRepair'
+
+class Station(spaceObject.SpaceObject):
+    __guid__ = 'spaceObject.Station'
+
+    def LoadModel(self, fileName = None, loadedModel = None):
+        slimItem = sm.StartService('michelle').GetBallpark().GetInvItem(self.id)
+        filename = cfg.invtypes.Get(slimItem.typeID).GraphicFile()
+        spaceObject.SpaceObject.LoadModel(self, filename)
+        self.fx = sm.GetService('FxSequencer')
+        self.stationState = pos.STRUCTURE_ONLINE
+        self.HandleStateChange()
+
+    def Assemble(self):
+        if hasattr(self.model, 'ChainAnimationEx'):
+            self.model.ChainAnimationEx('NormalLoop', 0, 0, 1.0)
+        self.SetupAmbientAudio()
+        self.HandleStateChange()
+
+    def OnSlimItemUpdated(self, newSlim):
+        self.HandleStateChange()
+
+    def HandleStateChange(self):
+        if self.stationState == pos.STRUCTURE_SHIELD_REINFORCE:
+            self.ShieldReinforced(False)
+        elif self.stationState == pos.STRUCTURE_ARMOR_REINFORCE:
+            self.ArmorReinforced(False)
+        slimItem = self.ballpark.GetInvItem(self.id)
+        if slimItem.structureState == pos.STRUCTURE_SHIELD_REINFORCE:
+            self.ShieldReinforced(True)
+        elif slimItem.structureState == pos.STRUCTURE_ARMOR_REINFORCE:
+            self.ArmorReinforced(True)
+        self.stationState = slimItem.structureState
+
+    def ShieldReinforced(self, startEffect):
+        self.fx.OnSpecialFX(self.id, None, None, None, None, [], SHIELD_EFFECT, False, startEffect, True, repeat=sys.maxint)
+
+    def ArmorReinforced(self, startEffect):
+        self.fx.OnSpecialFX(self.id, None, None, None, None, [], ARMOR_EFFECT, False, startEffect, True, repeat=sys.maxint)
+
+
+exports = {'spaceObject.Station': Station}

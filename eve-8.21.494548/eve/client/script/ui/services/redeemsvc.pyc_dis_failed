@@ -1,0 +1,876 @@
+#Embedded file name: c:/depot/games/branches/release/EVE-TRANQUILITY/eve/client/script/ui/services/redeemsvc.py
+import service
+import form
+import uix
+import listentry
+import util
+import uiutil
+import uicls
+import uiconst
+import localization
+import log
+import blue
+
+class RedeemService(service.Service):
+    __guid__ = 'svc.redeem'
+
+    def __init__(self):
+        service.Service.__init__(self)
+        self.tokens = None
+
+    def Run(self, *args):
+        service.Service.Run(self, *args)
+
+    def GetRedeemTokens(self, force = False):
+        if self.tokens is None or force:
+            self.tokens = sm.RemoteSvc('userSvc').GetRedeemTokens()
+        return self.tokens
+
+    def ReverseRedeem(self, item):
+        if eve.Message('ConfirmReverseRedeem', {'type': (TYPEID, item.typeID),
+         'quantity': item.stacksize}, uiconst.YESNO) != uiconst.ID_YES:
+            return
+        try:
+            sm.RemoteSvc('userSvc').ReverseRedeem(item.itemID)
+        finally:
+            self.tokens = None
+
+    def OpenRedeemWindow(self, charID, stationID, force = False):
+        if not self.GetRedeemTokens(force):
+            raise UserError('RedeemNoTokens')
+        wnd = form.RedeemWindow.GetIfOpen()
+        if wnd is None:
+            wnd = form.RedeemWindow.Open(charID=charID, stationID=stationID, useDefaultPos=True)
+            wnd.left -= 160
+        if wnd is not None and not wnd.destroyed:
+            wnd.Maximize()
+
+    def CloseRedeemWindow(self):
+        form.RedeemWindow.CloseIfOpen()
+
+    def ClaimRedeemTokens(self, tokens, charID):
+        try:
+            sm.RemoteSvc('userSvc').ClaimRedeemTokens(tokens, charID)
+        except (UserError,) as e:
+            eve.Message(e.msg, e.dict)
+        except (Exception,) as e:
+            raise 
+
+        self.tokens = None
+
+
+class RedeemWindow(uicls.Window):
+    __guid__ = 'form.RedeemWindow'
+    default_windowID = 'redeem'
+
+    def ApplyAttributes--- This code section failed: ---
+
+0	LOAD_GLOBAL       'uicls'
+3	LOAD_ATTR         'Window'
+6	LOAD_ATTR         'ApplyAttributes'
+9	LOAD_FAST         'self'
+12	LOAD_FAST         'attributes'
+15	CALL_FUNCTION_2   None
+18	POP_TOP           None
+
+19	LOAD_FAST         'attributes'
+22	LOAD_ATTR         'charID'
+25	STORE_FAST        'charID'
+
+28	LOAD_FAST         'attributes'
+31	LOAD_ATTR         'stationID'
+34	STORE_FAST        'stationID'
+
+37	LOAD_CONST        None
+40	LOAD_FAST         'self'
+43	STORE_ATTR        'tokens'
+
+46	BUILD_MAP         None
+49	LOAD_FAST         'self'
+52	STORE_ATTR        'selectedTokens'
+
+55	LOAD_GLOBAL       'sm'
+58	LOAD_ATTR         'StartService'
+61	LOAD_CONST        'redeem'
+64	CALL_FUNCTION_1   None
+67	LOAD_ATTR         'GetRedeemTokens'
+70	CALL_FUNCTION_0   None
+73	LOAD_FAST         'self'
+76	STORE_ATTR        'tokens'
+
+79	LOAD_FAST         'self'
+82	LOAD_ATTR         'SetWndIcon'
+85	LOAD_CONST        'ui_76_64_3'
+88	LOAD_CONST        'mainTop'
+91	LOAD_CONST        -10
+94	CALL_FUNCTION_257 None
+97	POP_TOP           None
+
+98	LOAD_FAST         'self'
+101	LOAD_ATTR         'SetCaption'
+104	LOAD_GLOBAL       'localization'
+107	LOAD_ATTR         'GetByLabel'
+110	LOAD_CONST        'UI/RedeemWindow/RedeemItem'
+113	CALL_FUNCTION_1   None
+116	CALL_FUNCTION_1   None
+119	POP_TOP           None
+
+120	LOAD_FAST         'self'
+123	LOAD_ATTR         'SetMinSize'
+126	LOAD_CONST        700
+129	LOAD_CONST        260
+132	BUILD_LIST_2      None
+135	CALL_FUNCTION_1   None
+138	POP_TOP           None
+
+139	LOAD_FAST         'self'
+142	LOAD_ATTR         'NoSeeThrough'
+145	CALL_FUNCTION_0   None
+148	POP_TOP           None
+
+149	LOAD_FAST         'self'
+152	LOAD_ATTR         'SetScope'
+155	LOAD_CONST        'all'
+158	CALL_FUNCTION_1   None
+161	POP_TOP           None
+
+162	LOAD_FAST         'charID'
+165	LOAD_FAST         'self'
+168	STORE_ATTR        'charID'
+
+171	LOAD_FAST         'stationID'
+174	LOAD_FAST         'self'
+177	STORE_ATTR        'stationID'
+
+180	LOAD_FAST         'self'
+183	LOAD_ATTR         'sr'
+186	LOAD_ATTR         'topParent'
+189	LOAD_ATTR         'height'
+192	LOAD_CONST        2
+195	BINARY_SUBTRACT   None
+196	STORE_FAST        'h'
+
+199	LOAD_GLOBAL       'uicls'
+202	LOAD_ATTR         'Container'
+205	LOAD_CONST        'name'
+208	LOAD_CONST        'picpar'
+211	LOAD_CONST        'parent'
+214	LOAD_FAST         'self'
+217	LOAD_ATTR         'sr'
+220	LOAD_ATTR         'topParent'
+223	LOAD_CONST        'align'
+226	LOAD_GLOBAL       'uiconst'
+229	LOAD_ATTR         'TORIGHT'
+232	LOAD_CONST        'width'
+235	LOAD_FAST         'h'
+238	LOAD_CONST        'height'
+241	LOAD_FAST         'h'
+244	LOAD_CONST        'left'
+247	LOAD_GLOBAL       'const'
+250	LOAD_ATTR         'defaultPadding'
+253	LOAD_CONST        'top'
+256	LOAD_GLOBAL       'const'
+259	LOAD_ATTR         'defaultPadding'
+262	CALL_FUNCTION_1792 None
+265	LOAD_FAST         'self'
+268	LOAD_ATTR         'sr'
+271	STORE_ATTR        'picParent'
+
+274	LOAD_GLOBAL       'uicls'
+277	LOAD_ATTR         'Sprite'
+280	LOAD_CONST        'parent'
+283	LOAD_FAST         'self'
+286	LOAD_ATTR         'sr'
+289	LOAD_ATTR         'picParent'
+292	LOAD_CONST        'align'
+295	LOAD_GLOBAL       'uiconst'
+298	LOAD_ATTR         'RELATIVE'
+301	LOAD_CONST        'left'
+304	LOAD_CONST        1
+307	LOAD_CONST        'top'
+310	LOAD_CONST        3
+313	LOAD_CONST        'height'
+316	LOAD_FAST         'h'
+319	LOAD_CONST        'width'
+322	LOAD_FAST         'h'
+325	CALL_FUNCTION_1536 None
+328	LOAD_FAST         'self'
+331	LOAD_ATTR         'sr'
+334	STORE_ATTR        'pic'
+
+337	LOAD_GLOBAL       'sm'
+340	LOAD_ATTR         'GetService'
+343	LOAD_CONST        'photo'
+346	CALL_FUNCTION_1   None
+349	LOAD_ATTR         'GetPortrait'
+352	LOAD_FAST         'charID'
+355	LOAD_CONST        64
+358	LOAD_FAST         'self'
+361	LOAD_ATTR         'sr'
+364	LOAD_ATTR         'pic'
+367	CALL_FUNCTION_3   None
+370	POP_TOP           None
+
+371	LOAD_GLOBAL       'uiconst'
+374	LOAD_ATTR         'UI_NORMAL'
+377	LOAD_FAST         'self'
+380	STORE_ATTR        'state'
+
+383	LOAD_GLOBAL       'uicls'
+386	LOAD_ATTR         'WndCaptionLabel'
+389	LOAD_CONST        'text'
+
+392	LOAD_GLOBAL       'localization'
+395	LOAD_ATTR         'GetByLabel'
+398	LOAD_CONST        'UI/RedeemWindow/RedeemItem'
+401	CALL_FUNCTION_1   None
+404	LOAD_CONST        'parent'
+
+407	LOAD_FAST         'self'
+410	LOAD_ATTR         'sr'
+413	LOAD_ATTR         'topParent'
+416	LOAD_CONST        'align'
+
+419	LOAD_GLOBAL       'uiconst'
+422	LOAD_ATTR         'RELATIVE'
+425	CALL_FUNCTION_768 None
+428	LOAD_FAST         'self'
+431	LOAD_ATTR         'sr'
+434	STORE_ATTR        'windowCaption'
+
+437	LOAD_GLOBAL       'localization'
+440	LOAD_ATTR         'GetByLabel'
+443	LOAD_CONST        'UI/RedeemWindow/ReedemNumItems'
+446	LOAD_CONST        'num'
+449	LOAD_GLOBAL       'len'
+452	LOAD_FAST         'self'
+455	LOAD_ATTR         'tokens'
+458	CALL_FUNCTION_1   None
+461	LOAD_CONST        'player'
+464	LOAD_FAST         'charID'
+467	CALL_FUNCTION_513 None
+470	STORE_FAST        'text'
+
+473	LOAD_CONST        5
+476	STORE_FAST        'tp'
+
+479	LOAD_GLOBAL       'uicls'
+482	LOAD_ATTR         'EveLabelMedium'
+485	LOAD_CONST        'text'
+488	LOAD_FAST         'text'
+491	LOAD_CONST        'parent'
+494	LOAD_FAST         'self'
+497	LOAD_ATTR         'sr'
+500	LOAD_ATTR         'topParent'
+503	LOAD_CONST        'top'
+506	LOAD_FAST         'tp'
+509	LOAD_CONST        'left'
+512	LOAD_CONST        60
+515	LOAD_CONST        'state'
+518	LOAD_GLOBAL       'uiconst'
+521	LOAD_ATTR         'UI_DISABLED'
+524	LOAD_CONST        'align'
+527	LOAD_GLOBAL       'uiconst'
+530	LOAD_ATTR         'TOPRIGHT'
+533	CALL_FUNCTION_1536 None
+536	STORE_FAST        't'
+
+539	LOAD_FAST         'tp'
+542	LOAD_FAST         't'
+545	LOAD_ATTR         'textheight'
+548	INPLACE_ADD       None
+549	STORE_FAST        'tp'
+
+552	LOAD_FAST         'stationID'
+555	POP_JUMP_IF_FALSE '683'
+
+558	LOAD_GLOBAL       'localization'
+561	LOAD_ATTR         'GetByLabel'
+564	LOAD_CONST        'UI/RedeemWindow/ItemsDeliveryLocation'
+567	LOAD_CONST        'shortStationName'
+570	LOAD_GLOBAL       'cfg'
+573	LOAD_ATTR         'evelocations'
+576	LOAD_ATTR         'Get'
+579	LOAD_FAST         'stationID'
+582	CALL_FUNCTION_1   None
+585	LOAD_ATTR         'name'
+588	LOAD_ATTR         'split'
+591	LOAD_CONST        ' - '
+594	CALL_FUNCTION_1   None
+597	LOAD_CONST        0
+600	BINARY_SUBSCR     None
+601	CALL_FUNCTION_257 None
+604	STORE_FAST        'text'
+
+607	LOAD_GLOBAL       'uicls'
+610	LOAD_ATTR         'EveLabelMedium'
+613	LOAD_CONST        'text'
+616	LOAD_FAST         'text'
+619	LOAD_CONST        'parent'
+622	LOAD_FAST         'self'
+625	LOAD_ATTR         'sr'
+628	LOAD_ATTR         'topParent'
+631	LOAD_CONST        'top'
+634	LOAD_FAST         'tp'
+637	LOAD_CONST        'left'
+640	LOAD_CONST        60
+643	LOAD_CONST        'state'
+646	LOAD_GLOBAL       'uiconst'
+649	LOAD_ATTR         'UI_DISABLED'
+652	LOAD_CONST        'align'
+655	LOAD_GLOBAL       'uiconst'
+658	LOAD_ATTR         'TOPRIGHT'
+661	CALL_FUNCTION_1536 None
+664	STORE_FAST        't'
+
+667	LOAD_FAST         'tp'
+670	LOAD_FAST         't'
+673	LOAD_ATTR         'height'
+676	INPLACE_ADD       None
+677	STORE_FAST        'tp'
+680	JUMP_FORWARD      '758'
+
+683	LOAD_GLOBAL       'localization'
+686	LOAD_ATTR         'GetByLabel'
+689	LOAD_CONST        'UI/RedeemWindow/IncorrectPlayerLocation'
+692	CALL_FUNCTION_1   None
+695	STORE_FAST        'text'
+
+698	LOAD_GLOBAL       'uicls'
+701	LOAD_ATTR         'EveLabelMedium'
+704	LOAD_CONST        'text'
+707	LOAD_FAST         'text'
+710	LOAD_CONST        'parent'
+713	LOAD_FAST         'self'
+716	LOAD_ATTR         'sr'
+719	LOAD_ATTR         'topParent'
+722	LOAD_CONST        'top'
+725	LOAD_FAST         'tp'
+728	LOAD_CONST        'left'
+731	LOAD_CONST        60
+734	LOAD_CONST        'state'
+737	LOAD_GLOBAL       'uiconst'
+740	LOAD_ATTR         'UI_DISABLED'
+743	LOAD_CONST        'align'
+746	LOAD_GLOBAL       'uiconst'
+749	LOAD_ATTR         'TOPRIGHT'
+752	CALL_FUNCTION_1536 None
+755	STORE_FAST        't'
+758_0	COME_FROM         '680'
+
+758	LOAD_GLOBAL       'uicls'
+761	LOAD_ATTR         'Container'
+764	LOAD_CONST        'name'
+767	LOAD_CONST        'push'
+770	LOAD_CONST        'parent'
+773	LOAD_FAST         'self'
+776	LOAD_ATTR         'sr'
+779	LOAD_ATTR         'main'
+782	LOAD_CONST        'align'
+785	LOAD_GLOBAL       'uiconst'
+788	LOAD_ATTR         'TOLEFT'
+791	LOAD_CONST        'width'
+794	LOAD_GLOBAL       'const'
+797	LOAD_ATTR         'defaultPadding'
+800	CALL_FUNCTION_1024 None
+803	POP_TOP           None
+
+804	LOAD_GLOBAL       'uicls'
+807	LOAD_ATTR         'Container'
+810	LOAD_CONST        'name'
+813	LOAD_CONST        'push'
+816	LOAD_CONST        'parent'
+819	LOAD_FAST         'self'
+822	LOAD_ATTR         'sr'
+825	LOAD_ATTR         'main'
+828	LOAD_CONST        'align'
+831	LOAD_GLOBAL       'uiconst'
+834	LOAD_ATTR         'TORIGHT'
+837	LOAD_CONST        'width'
+840	LOAD_GLOBAL       'const'
+843	LOAD_ATTR         'defaultPadding'
+846	CALL_FUNCTION_1024 None
+849	POP_TOP           None
+
+850	LOAD_GLOBAL       'localization'
+853	LOAD_ATTR         'GetByLabel'
+856	LOAD_CONST        'UI/RedeemWindow/RedeemSelectedItems'
+859	CALL_FUNCTION_1   None
+862	LOAD_FAST         'self'
+865	LOAD_ATTR         'RedeemSelected'
+868	LOAD_CONST        ()
+871	LOAD_CONST        84
+874	BUILD_TUPLE_4     None
+877	BUILD_LIST_1      None
+880	STORE_FAST        'btns'
+
+883	LOAD_GLOBAL       'uicls'
+886	LOAD_ATTR         'ButtonGroup'
+889	LOAD_CONST        'btns'
+892	LOAD_FAST         'btns'
+895	LOAD_CONST        'parent'
+898	LOAD_FAST         'self'
+901	LOAD_ATTR         'sr'
+904	LOAD_ATTR         'main'
+907	LOAD_CONST        'unisize'
+910	LOAD_CONST        1
+913	CALL_FUNCTION_768 None
+916	LOAD_FAST         'self'
+919	LOAD_ATTR         'sr'
+922	STORE_ATTR        'redeemBtn'
+
+925	LOAD_GLOBAL       'uicls'
+928	LOAD_ATTR         'Scroll'
+931	LOAD_CONST        'parent'
+934	LOAD_FAST         'self'
+937	LOAD_ATTR         'sr'
+940	LOAD_ATTR         'main'
+943	LOAD_CONST        'padTop'
+946	LOAD_GLOBAL       'const'
+949	LOAD_ATTR         'defaultPadding'
+952	CALL_FUNCTION_512 None
+955	LOAD_FAST         'self'
+958	LOAD_ATTR         'sr'
+961	STORE_ATTR        'itemsScroll'
+
+964	LOAD_CONST        0
+967	LOAD_FAST         'self'
+970	LOAD_ATTR         'sr'
+973	LOAD_ATTR         'itemsScroll'
+976	STORE_ATTR        'hiliteSorted'
+
+979	LOAD_GLOBAL       'uicls'
+982	LOAD_ATTR         'Container'
+985	LOAD_CONST        'name'
+988	LOAD_CONST        'push'
+991	LOAD_CONST        'parent'
+994	LOAD_FAST         'self'
+997	LOAD_ATTR         'sr'
+1000	LOAD_ATTR         'main'
+1003	LOAD_CONST        'align'
+1006	LOAD_GLOBAL       'uiconst'
+1009	LOAD_ATTR         'TOBOTTOM'
+1012	LOAD_CONST        'width'
+1015	LOAD_CONST        6
+1018	CALL_FUNCTION_1024 None
+1021	POP_TOP           None
+
+1022	BUILD_LIST_0      None
+1025	STORE_FAST        'scrolllist'
+
+1028	LOAD_CONST        0
+1031	STORE_FAST        'expireUsed'
+
+1034	SETUP_LOOP        '1529'
+1037	LOAD_FAST         'self'
+1040	LOAD_ATTR         'tokens'
+1043	GET_ITER          None
+1044	FOR_ITER          '1528'
+1047	STORE_FAST        'token'
+
+1050	LOAD_GLOBAL       'cfg'
+1053	LOAD_ATTR         'invtypes'
+1056	LOAD_ATTR         'GetIfExists'
+1059	LOAD_FAST         'token'
+1062	LOAD_ATTR         'typeID'
+1065	CALL_FUNCTION_1   None
+1068	STORE_FAST        'ty'
+
+1071	LOAD_FAST         'token'
+1074	LOAD_ATTR         'description'
+1077	JUMP_IF_TRUE_OR_POP '1110'
+1080	LOAD_FAST         'token'
+1083	LOAD_ATTR         'label'
+1086	POP_JUMP_IF_FALSE '1107'
+1089	LOAD_GLOBAL       'localization'
+1092	LOAD_ATTR         'GetByLabel'
+1095	LOAD_FAST         'token'
+1098	LOAD_ATTR         'label'
+1101	CALL_FUNCTION_1   None
+1104_0	COME_FROM         '1077'
+1104	JUMP_FORWARD      '1110'
+1107	LOAD_CONST        ''
+1110_0	COME_FROM         '1104'
+1110	STORE_FAST        'desc'
+
+1113	LOAD_FAST         'token'
+1116	LOAD_ATTR         'quantity'
+1119	STORE_FAST        'qty'
+
+1122	LOAD_FAST         'ty'
+1125	LOAD_CONST        None
+1128	COMPARE_OP        'is'
+1131	POP_JUMP_IF_FALSE '1223'
+
+1134	LOAD_GLOBAL       'localization'
+1137	LOAD_ATTR         'GetByLabel'
+1140	LOAD_CONST        'UI/RedeemWindow/UnknownType'
+1143	CALL_FUNCTION_1   None
+1146	LOAD_CONST        '<t>%d<t>%s'
+1149	LOAD_FAST         'qty'
+1152	LOAD_FAST         'desc'
+1155	BUILD_TUPLE_2     None
+1158	BINARY_MODULO     None
+1159	BINARY_ADD        None
+1160	STORE_FAST        'msg'
+
+1163	LOAD_FAST         'scrolllist'
+1166	LOAD_ATTR         'append'
+1169	LOAD_GLOBAL       'listentry'
+1172	LOAD_ATTR         'Get'
+1175	LOAD_CONST        'Generic'
+1178	BUILD_MAP         None
+1181	LOAD_FAST         'msg'
+1184	LOAD_CONST        'label'
+1187	STORE_MAP         None
+1188	CALL_FUNCTION_2   None
+1191	CALL_FUNCTION_1   None
+1194	POP_TOP           None
+
+1195	LOAD_GLOBAL       'log'
+1198	LOAD_ATTR         'LogWarn'
+1201	LOAD_CONST        "A Token was found that we don't know about"
+1204	LOAD_FAST         'token'
+1207	LOAD_ATTR         'typeID'
+1210	LOAD_CONST        'ignoring it for now! Coming Soon(tm)'
+1213	CALL_FUNCTION_3   None
+1216	POP_TOP           None
+
+1217	CONTINUE          '1044'
+1220	JUMP_FORWARD      '1223'
+1223_0	COME_FROM         '1220'
+
+1223	LOAD_CONST        None
+1226	LOAD_FAST         'self'
+1229	LOAD_ATTR         'selectedTokens'
+1232	LOAD_FAST         'token'
+1235	LOAD_ATTR         'tokenID'
+1238	LOAD_FAST         'token'
+1241	LOAD_ATTR         'massTokenID'
+1244	BUILD_TUPLE_2     None
+1247	STORE_SUBSCR      None
+
+1248	LOAD_FAST         'token'
+1251	LOAD_ATTR         'expireDateTime'
+1254	POP_JUMP_IF_FALSE '1312'
+
+1257	LOAD_CONST        1
+1260	STORE_FAST        'expireUsed'
+
+1263	LOAD_CONST        '%s<t>%s'
+1266	LOAD_FAST         'desc'
+1269	LOAD_GLOBAL       'localization'
+1272	LOAD_ATTR         'GetByLabel'
+1275	LOAD_CONST        'UI/RedeemWindow/RedeemExpires'
+1278	LOAD_CONST        'expires'
+1281	LOAD_FAST         'token'
+1284	LOAD_ATTR         'expireDateTime'
+1287	CALL_FUNCTION_257 None
+1290	LOAD_ATTR         'replace'
+1293	LOAD_CONST        '<br>'
+1296	LOAD_CONST        ''
+1299	CALL_FUNCTION_2   None
+1302	BUILD_TUPLE_2     None
+1305	BINARY_MODULO     None
+1306	STORE_FAST        'desc'
+1309	JUMP_FORWARD      '1312'
+1312_0	COME_FROM         '1309'
+
+1312	LOAD_FAST         'token'
+1315	LOAD_ATTR         'stationID'
+1318	POP_JUMP_IF_FALSE '1354'
+
+1321	LOAD_GLOBAL       'localization'
+1324	LOAD_ATTR         'GetByLabel'
+1327	LOAD_CONST        'UI/RedeemWindow/RedeemableTo'
+1330	LOAD_CONST        'desc'
+1333	LOAD_FAST         'desc'
+1336	LOAD_CONST        'station'
+1339	LOAD_FAST         'token'
+1342	LOAD_ATTR         'stationID'
+1345	CALL_FUNCTION_513 None
+1348	STORE_FAST        'desc'
+1351	JUMP_FORWARD      '1354'
+1354_0	COME_FROM         '1351'
+
+1354	LOAD_FAST         'qty'
+1357	LOAD_FAST         'ty'
+1360	LOAD_ATTR         'portionSize'
+1363	INPLACE_MULTIPLY  None
+1364	STORE_FAST        'qty'
+
+1367	LOAD_CONST        '%s<t>%s<t>%s'
+1370	LOAD_FAST         'ty'
+1373	LOAD_ATTR         'typeName'
+1376	LOAD_FAST         'qty'
+1379	LOAD_FAST         'desc'
+1382	BUILD_TUPLE_3     None
+1385	BINARY_MODULO     None
+1386	STORE_FAST        'label'
+
+1389	LOAD_FAST         'scrolllist'
+1392	LOAD_ATTR         'append'
+1395	LOAD_GLOBAL       'listentry'
+1398	LOAD_ATTR         'Get'
+1401	LOAD_CONST        'RedeemToken'
+1404	BUILD_MAP         None
+
+1407	LOAD_CONST        None
+1410	LOAD_CONST        'itemID'
+1413	STORE_MAP         None
+
+1414	LOAD_FAST         'token'
+1417	LOAD_ATTR         'tokenID'
+1420	LOAD_CONST        'tokenID'
+1423	STORE_MAP         None
+
+1424	LOAD_FAST         'token'
+1427	LOAD_ATTR         'massTokenID'
+1430	LOAD_CONST        'massTokenID'
+1433	STORE_MAP         None
+
+1434	LOAD_FAST         'token'
+1437	LOAD_CONST        'info'
+1440	STORE_MAP         None
+
+1441	LOAD_FAST         'ty'
+1444	LOAD_ATTR         'typeID'
+1447	LOAD_CONST        'typeID'
+1450	STORE_MAP         None
+
+1451	LOAD_FAST         'token'
+1454	LOAD_ATTR         'stationID'
+1457	LOAD_CONST        'stationID'
+1460	STORE_MAP         None
+
+1461	LOAD_FAST         'label'
+1464	LOAD_CONST        'label'
+1467	STORE_MAP         None
+
+1468	LOAD_FAST         'qty'
+1471	LOAD_CONST        'quantity'
+1474	STORE_MAP         None
+
+1475	LOAD_CONST        1
+1478	LOAD_CONST        'getIcon'
+1481	STORE_MAP         None
+
+1482	LOAD_FAST         'token'
+1485	LOAD_ATTR         'tokenID'
+1488	LOAD_FAST         'token'
+1491	LOAD_ATTR         'massTokenID'
+1494	BUILD_TUPLE_2     None
+1497	LOAD_CONST        'retval'
+1500	STORE_MAP         None
+
+1501	LOAD_FAST         'self'
+1504	LOAD_ATTR         'OnTokenChange'
+1507	LOAD_CONST        'OnChange'
+1510	STORE_MAP         None
+
+1511	LOAD_GLOBAL       'True'
+1514	LOAD_CONST        'checked'
+1517	STORE_MAP         None
+1518	CALL_FUNCTION_2   None
+1521	CALL_FUNCTION_1   None
+1524	POP_TOP           None
+1525	JUMP_BACK         '1044'
+1528	POP_BLOCK         None
+1529_0	COME_FROM         '1034'
+
+1529	LOAD_FAST         'self'
+1532	LOAD_ATTR         'sr'
+1535	LOAD_ATTR         'itemsScroll'
+1538	LOAD_CONST        None
+1541	COMPARE_OP        'is not'
+1544	POP_JUMP_IF_FALSE '1810'
+
+1547	LOAD_CONST        'itemsScroll'
+1550	LOAD_FAST         'self'
+1553	LOAD_ATTR         'sr'
+1556	LOAD_ATTR         'itemsScroll'
+1559	LOAD_ATTR         'sr'
+1562	STORE_ATTR        'id'
+
+1565	LOAD_CONST        None
+1568	LOAD_FAST         'self'
+1571	LOAD_ATTR         'sr'
+1574	LOAD_ATTR         'itemsScroll'
+1577	LOAD_ATTR         'sr'
+1580	STORE_ATTR        'lastSelected'
+
+1583	BUILD_MAP         None
+1586	LOAD_CONST        50
+1589	LOAD_GLOBAL       'localization'
+1592	LOAD_ATTR         'GetByLabel'
+1595	LOAD_CONST        'UI/Common/Type'
+1598	CALL_FUNCTION_1   None
+1601	STORE_MAP         None
+1602	LOAD_FAST         'self'
+1605	LOAD_ATTR         'sr'
+1608	LOAD_ATTR         'itemsScroll'
+1611	LOAD_ATTR         'sr'
+1614	STORE_ATTR        'minColumnWidth'
+
+1617	LOAD_GLOBAL       'localization'
+1620	LOAD_ATTR         'GetByLabel'
+1623	LOAD_CONST        'UI/Common/Type'
+1626	CALL_FUNCTION_1   None
+
+1629	LOAD_GLOBAL       'localization'
+1632	LOAD_ATTR         'GetByLabel'
+1635	LOAD_CONST        'UI/Common/Quantity'
+1638	CALL_FUNCTION_1   None
+
+1641	LOAD_GLOBAL       'localization'
+1644	LOAD_ATTR         'GetByLabel'
+1647	LOAD_CONST        'UI/Common/Description'
+1650	CALL_FUNCTION_1   None
+1653	BUILD_LIST_3      None
+1656	STORE_FAST        'headers'
+
+1659	LOAD_FAST         'expireUsed'
+1662	LOAD_CONST        1
+1665	COMPARE_OP        '=='
+1668	POP_JUMP_IF_FALSE '1779'
+
+1671	LOAD_FAST         'headers'
+1674	LOAD_ATTR         'append'
+1677	LOAD_GLOBAL       'localization'
+1680	LOAD_ATTR         'GetByLabel'
+1683	LOAD_CONST        'UI/Common/Expires'
+1686	CALL_FUNCTION_1   None
+1689	CALL_FUNCTION_1   None
+1692	POP_TOP           None
+
+1693	LOAD_GLOBAL       'uicls'
+1696	LOAD_ATTR         'EveLabelMedium'
+1699	LOAD_ATTR         'MeasureTextSize'
+1702	LOAD_GLOBAL       'util'
+1705	LOAD_ATTR         'FmtDate'
+1708	LOAD_GLOBAL       'blue'
+1711	LOAD_ATTR         'os'
+1714	LOAD_ATTR         'GetWallclockTime'
+1717	CALL_FUNCTION_0   None
+1720	LOAD_CONST        'ln'
+1723	CALL_FUNCTION_2   None
+1726	CALL_FUNCTION_1   None
+1729	UNPACK_SEQUENCE_2 None
+1732	STORE_FAST        'dWidth'
+1735	STORE_FAST        'dHeight'
+
+1738	BUILD_MAP         None
+1741	LOAD_FAST         'dWidth'
+1744	LOAD_CONST        16
+1747	BINARY_ADD        None
+1748	LOAD_GLOBAL       'localization'
+1751	LOAD_ATTR         'GetByLabel'
+1754	LOAD_CONST        'UI/Common/Expires'
+1757	CALL_FUNCTION_1   None
+1760	STORE_MAP         None
+1761	LOAD_FAST         'self'
+1764	LOAD_ATTR         'sr'
+1767	LOAD_ATTR         'itemsScroll'
+1770	LOAD_ATTR         'sr'
+1773	STORE_ATTR        'fixedColumns'
+1776	JUMP_FORWARD      '1779'
+1779_0	COME_FROM         '1776'
+
+1779	LOAD_FAST         'self'
+1782	LOAD_ATTR         'sr'
+1785	LOAD_ATTR         'itemsScroll'
+1788	LOAD_ATTR         'Load'
+1791	LOAD_CONST        'contentList'
+1794	LOAD_FAST         'scrolllist'
+1797	LOAD_CONST        'headers'
+1800	LOAD_FAST         'headers'
+1803	CALL_FUNCTION_512 None
+1806	POP_TOP           None
+1807	JUMP_FORWARD      '1810'
+1810_0	COME_FROM         '1807'
+
+1810	LOAD_FAST         'self'
+1813	RETURN_VALUE      None
+-1	RETURN_LAST       None
+
+Syntax error at or near `LOAD_CONST' token at offset 1107
+
+    def RedeemSelected(self, *args):
+        if self.stationID is None:
+            raise UserError('RedeemOnlyInStation')
+        if not len(self.selectedTokens.keys()):
+            return
+        if eve.Message('RedeemConfirmClaim', {'char': self.charID,
+         'station': self.stationID}, uiconst.YESNO, default=uiconst.ID_NO) != uiconst.ID_YES:
+            return
+        sm.StartService('redeem').ClaimRedeemTokens(self.selectedTokens.keys(), self.charID)
+        self.Close()
+
+    def OnTokenChange(self, checkbox, *args):
+        tokenID, massTokenID = checkbox.data['retval']
+        k = (tokenID, massTokenID)
+        gv = True
+        try:
+            gv = checkbox.GetValue()
+        except:
+            pass
+
+        if gv:
+            self.selectedTokens[k] = None
+        elif k in self.selectedTokens:
+            del self.selectedTokens[k]
+        if len(self.selectedTokens) > 0:
+            self.sr.redeemBtn.state = uiconst.UI_NORMAL
+        else:
+            self.sr.redeemBtn.state = uiconst.UI_DISABLED
+
+
+class RedeemToken(listentry.Item):
+    __guid__ = 'listentry.RedeemToken'
+
+    def init(self):
+        self.sr.overlay = uicls.Container(name='overlay', align=uiconst.TOPLEFT, parent=self, height=1)
+        self.sr.tlicon = None
+
+    def Startup(self, *args):
+        listentry.Item.Startup(self, args)
+        cbox = uicls.Checkbox(text='', parent=self, configName='cb', retval=None, checked=1, align=uiconst.TOPLEFT, pos=(6, 4, 0, 0), callback=self.CheckBoxChange)
+        cbox.data = {}
+        self.sr.checkbox = cbox
+        self.sr.checkbox.state = uiconst.UI_NORMAL
+
+    def Load(self, args):
+        listentry.Item.Load(self, args)
+        data = self.sr.node
+        self.sr.checkbox.SetGroup(data.group)
+        self.sr.checkbox.SetChecked(data.checked, 0)
+        self.sr.checkbox.data = {'key': (data.tokenID, data.massTokenID),
+         'retval': data.retval}
+        self.sr.icon.left = 24
+        self.sr.label.left = self.sr.icon.left + self.sr.icon.width + 4
+        gdm = sm.StartService('godma').GetType(self.sr.node.info.typeID)
+        if gdm.techLevel in (2, 3):
+            self.sr.techIcon.left = 24
+        elif self.sr.tlicon:
+            self.sr.tlicon.state = uiconst.UI_HIDDEN
+
+    def OnClick(self, *args):
+        shift = uicore.uilib.Key(uiconst.VK_SHIFT)
+        lastSelected = self.sr.node.scroll.sr.lastSelected
+        if lastSelected is None:
+            shift = 0
+        idx = self.sr.node.idx
+        if self.sr.checkbox.checked:
+            eve.Message('DiodeDeselect')
+        else:
+            eve.Message('DiodeClick')
+        isIt = not self.sr.checkbox.checked
+        self.sr.checkbox.SetChecked(isIt)
+        self.sr.node.scroll.sr.lastSelected = idx
+
+    def GetMenu(self):
+        return [(uiutil.MenuLabel('UI/Commands/ShowInfo'), self.ShowInfo, (self.sr.node,))]
+
+    def CheckBoxChange(self, *args):
+        self.sr.node.checked = self.sr.checkbox.checked
+        self.sr.node.OnChange(*args)
